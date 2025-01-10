@@ -1,0 +1,10 @@
+[package]
+name = "my-hyper-utils"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+http = "*"
+hyper-util = { version = "*", features = ["tokio"] }
+http-body-util = { version = "*" }
+bytes = "*"
