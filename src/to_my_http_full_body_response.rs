@@ -48,9 +48,12 @@ pub fn compile_full_body<TResult>(
     compiler(builder, full_body)
 }
 
-pub async fn box_body_to_vec(
+pub async fn box_body_to_vec<TError>(
     body: http_body_util::combinators::BoxBody<bytes::Bytes, String>,
-) -> Result<Vec<u8>, String> {
-    let collected = body.collect().await?;
-    Ok(collected.to_bytes().into())
+    map_error: impl Fn(String) -> TError,
+) -> Result<Vec<u8>, TError> {
+    match body.collect().await {
+        Ok(collected) => Ok(collected.to_bytes().into()),
+        Err(err) => Err(map_error(err.to_string())),
+    }
 }
