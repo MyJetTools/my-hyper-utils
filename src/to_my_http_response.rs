@@ -6,6 +6,17 @@ pub trait ToMyHttpResponse {
     fn to_my_http_response(self) -> MyHttpResponse;
 }
 
+impl ToMyHttpResponse for (http::response::Builder, &'_ [u8]) {
+    fn to_my_http_response(self) -> MyHttpResponse {
+        let (builder, body) = self;
+        let full_body = http_body_util::Full::new(body.to_vec().into());
+
+        builder
+            .body(full_body.map_err(|itm| itm.to_string()).boxed())
+            .unwrap()
+    }
+}
+
 impl ToMyHttpResponse for (http::response::Builder, Vec<u8>) {
     fn to_my_http_response(self) -> MyHttpResponse {
         let (builder, body) = self;
@@ -21,6 +32,28 @@ impl ToMyHttpResponse for (http::response::Builder, String) {
     fn to_my_http_response(self) -> MyHttpResponse {
         let (builder, body) = self;
         let full_body = http_body_util::Full::new(body.into());
+
+        builder
+            .body(full_body.map_err(|itm| itm.to_string()).boxed())
+            .unwrap()
+    }
+}
+
+impl ToMyHttpResponse for (http::response::Builder, &'_ String) {
+    fn to_my_http_response(self) -> MyHttpResponse {
+        let (builder, body) = self;
+        let full_body = http_body_util::Full::new(body.as_bytes().to_vec().into());
+
+        builder
+            .body(full_body.map_err(|itm| itm.to_string()).boxed())
+            .unwrap()
+    }
+}
+
+impl ToMyHttpResponse for (http::response::Builder, &'_ str) {
+    fn to_my_http_response(self) -> MyHttpResponse {
+        let (builder, body) = self;
+        let full_body = http_body_util::Full::new(body.as_bytes().to_vec().into());
 
         builder
             .body(full_body.map_err(|itm| itm.to_string()).boxed())
