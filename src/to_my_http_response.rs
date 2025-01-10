@@ -7,6 +7,18 @@ pub trait ToMyHttpResponse {
     fn to_my_http_response(self) -> MyHttpResponse;
 }
 
+impl ToMyHttpResponse for (StatusCode, &'_ str) {
+    fn to_my_http_response(self) -> MyHttpResponse {
+        let (status_code, body) = self;
+        let full_body = http_body_util::Full::new(body.as_bytes().to_vec().into());
+
+        http::response::Response::builder()
+            .status(status_code)
+            .body(full_body.map_err(|itm| itm.to_string()).boxed())
+            .unwrap()
+    }
+}
+
 impl ToMyHttpResponse for (StatusCode, &'_ [u8]) {
     fn to_my_http_response(self) -> MyHttpResponse {
         let (status_code, body) = self;
